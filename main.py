@@ -1,28 +1,29 @@
 """Main file to test the OSDN."""
 
-from keras.models import load_model
+
 import numpy as np
 import tensorflow as tf
-#from ..utils.generic_utils import transpose_shape
+from tensorflow.keras.models import load_model
+# from ..utils.generic_utils import transpose_shape
 from utils.openmax import get_train_test, create_model, make_save_model, prepare_data
 from utils.openmax import image_show, compute_activation, compute_openmax
 
 
 def main():
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        #model_1 = load_model('C:/Users/USER/Desktop/OSDN-36ca4684787b53956dd409a5a37fddca76eb2761/data/MNIST_CNN.h5')
-        #model_1.summary()
-        np.random.seed(12345)
+    with tf.compat.v1.Session() as sess:
+        sess.run(tf.compat.v1.global_variables_initializer())
+        # model_1 = load_model('C:/Users/USER/Desktop/OSDN-36ca4684787b53956dd409a5a37fddca76eb2761/data/MNIST_CNN.h5')
+        # model_1.summary()
+        # np.random.seed(12345)
 
         # Step 1: Train a CNN model for the dataset you choice
 
-        new_model = make_save_model()
-        new_model.summary()
-        model = new_model
+        # new_model = make_save_model()
+        # new_model.summary()
+        # model = new_model
 
         # Step 2: Load the trained model
-        # model = load_model(new_model)
+        model = load_model('data/test_cnn_model.h5')
 
         # Step 3: Load the training data you trained the DNN model
         data = prepare_data()
@@ -52,7 +53,7 @@ def main():
 
             print('Actual Label: ', np.argmax(test_y1))
             print('Prediction Softmax: ', softmax)
-            if openmax == 10:
+            if openmax == 5:
                 openmax = 'Unknown'
             print('Prediction openmax: ', openmax)
             labels = (np.argmax(test_y1), softmax, openmax)
