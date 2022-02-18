@@ -74,11 +74,10 @@ def computeOpenMaxProbability(openmax_fc8, openmax_score_u):
 # ---------------------------------------------------------------------------------
 
 
-def recalibrate_scores(weibull_model, labellist, imgarr,
-                       layer='fc8', alpharank=6, distance_type='eucos'):
+def recalibrate_scores(weibull_model, labellist, imgarr, layer='fc8', alpharank=6, distance_type='eucos'):
     """
     Given FC8 features for an image, list of weibull models for each class,
-    re-calibrate scores
+    re-calibrate scores ---> 스코어를 재측정함
 
     Input:
     ---------------
@@ -96,10 +95,10 @@ def recalibrate_scores(weibull_model, labellist, imgarr,
 
     """
     imglayer = imgarr[layer]
-    ranked_list = imgarr['scores'].argsort().ravel()[::-1]
+    ranked_list = imgarr['scores'].argsort().ravel()[::-1]   # ravel : 평평한 넘파이 배열을 행 혹은 열로 변환
     print(ranked_list)
     #alpha_weights = [((alpharank+1) - i)/float(alpharank) for i in range(1, alpharank+1)]
-    alpha_weights = [1.0, 0.9, 0.8, 0.7, 0.6]
+    alpha_weights = [1.0, 0.9, 0.8, 0.7, 0.6]   # 요게 뭔지 잘 모르겠음
     print(alpha_weights)
     ranked_alpha = sp.zeros(5)
     print('----------------------------------------------------------------')
@@ -119,14 +118,12 @@ def recalibrate_scores(weibull_model, labellist, imgarr,
         # count = 0
         for categoryid in range(NCLASSES):
             # get distance between current channel and mean vector
-            #category_weibull = query_weibull(labellist[categoryid], weibull_model, distance_type=distance_type)
-            category_weibull = query_weibull(4, weibull_model, distance_type=distance_type)  # 4 대신 윗줄처럼 넣어야 함!!! 임시로 넣은거임
+            category_weibull = query_weibull(labellist[categoryid], weibull_model, distance_type=distance_type)
+            # category_weibull = query_weibull(4, weibull_model, distance_type=distance_type)  ## 4 대신 윗줄처럼 넣어야 함!!! 임시로 넣은거임
             # print (
             #    category_weibull[0], category_weibull[1],category_weibull[2])
 
-            channel_distance = compute_distance(
-                channel_scores, channel, category_weibull[0],
-                distance_type=distance_type)
+            channel_distance = compute_distance(channel_scores, channel, category_weibull[0], distance_type=distance_type)
             # print ('cd',channel_distance)
             # obtain w_score for the distance and compute probability of the
             # distance
@@ -151,7 +148,9 @@ def recalibrate_scores(weibull_model, labellist, imgarr,
     # print (openmax_fc8,openmax_score_u)
     # Pass the recalibrated fc8 scores for the image into openmax
     openmax_probab = computeOpenMaxProbability(openmax_fc8, openmax_score_u)
+    print('openmax_probab: ', openmax_probab)
     softmax_probab = imgarr['scores'].ravel()
+    print('softmax_probab: ', softmax_probab)
     return sp.asarray(openmax_probab), sp.asarray(softmax_probab)
 
 # ---------------------------------------------------------------------------------
@@ -220,8 +219,7 @@ def main():
 
     #labellist = getlabellist(synsetfname)
     labellist = ['mean_vec', 'distances', 'weibull_model']
-    weibull_model = weibull_tailfitting(mean_path, distance_path, labellist,
-                                        tailsize=WEIBULL_TAIL_SIZE)
+    weibull_model = weibull_tailfitting(mean_path, distance_path, labellist, tailsize=WEIBULL_TAIL_SIZE)
 
     print("Completed Weibull fitting on %s models" % len(weibull_model.keys()))
     imgarr = loadmat(image_arrname)
